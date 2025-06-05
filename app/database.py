@@ -14,16 +14,20 @@ import dotenv
 
 class EnverontmentVariableNotFound(BaseException):
     """
-    Класс для пробрасвания своих ошибок
+    Класс для пробрасывания своих ошибок
     """
 
     pass
 
 
 class Base(DeclarativeBase):
+    """
+    Базовый класс для всех ORM-моделей проекта.
+    Используется для регистрации всех моделей и доступа к общей metadata.
+    """
     pass
 
-
+# Настройки логгирования
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
