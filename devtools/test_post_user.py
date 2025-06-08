@@ -2,8 +2,8 @@ import json
 
 import httpx
 
-data = {"name": "eugenii_3", "email": "eugenii_3@eugenii.ru"}
+data = {"name": "eugenii_2", "email": "eugenii_2@eugenii.ru"}
 
-response = httpx.post("http://localhost:8000/users/", json=data)
+response = httpx.post("http://0.0.0.0:8000/users/", json=data)
 print(response.status_code, response.json())
 print(json.dumps(response.json(), indent=4, ensure_ascii=False))
