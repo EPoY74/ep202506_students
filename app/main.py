@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .database import async_session, engine, Base
 from contextlib import asynccontextmanager
 from app import crud
-from app import schemas
+from app.schemas import schemas
 
 
 @asynccontextmanager
@@ -21,7 +21,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
         await conn.run_sync(Base.metadata.create_all)
         yield
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 # Зависимость
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -33,9 +35,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 @app.post("/users/", response_model=schemas.UserRead)
-async def create_user(
-    user: schemas.UserCreate, db: AsyncSession = Depends(get_db)
-):
+async def create_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
     """
     Создает пользователя
     """
