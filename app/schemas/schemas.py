@@ -5,22 +5,23 @@ Pydantic-схемы для работы с пользователями (соз�
 from pydantic import BaseModel, EmailStr
 
 
-class UserBase(BaseModel):
+class StudentBase(BaseModel):
     """
     Базовая схема пользователя 
     """
-    name: str
+    first_name: str
+    last_name: str
     email: EmailStr
 
 
-class UserCreate(UserBase):
+class StudentCreate(StudentBase):
     """
     Схема для создания нового пользователя.
     """
     pass
 
 
-class UserRead(UserBase):
+class StudentRead(StudentBase):
     """
     Схема для чтения информации о пользователе
     """
