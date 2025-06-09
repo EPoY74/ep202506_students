@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import Student
-from app.schemas import UserCreate
+from app.schemas.schemas import StudentCreate
 
 
 async def get_users(db: AsyncSession):
@@ -10,10 +10,11 @@ async def get_users(db: AsyncSession):
 
 
 async def get_user(db: AsyncSession, user_id: int):
-    return await db.get(Student, user_id)
+    result = await db.get(Student, user_id)
+    return result
 
 
-async def create_user(db: AsyncSession, user: UserCreate):
+async def create_user(db: AsyncSession, user: StudentCreate):
     db_user = Student(**user.model_dump())
     db.add(db_user)
     await db.commit()
