@@ -34,15 +34,15 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-@app.post("/users/", response_model=schemas.UserRead)
-async def create_user(user: schemas.UserCreate, db: AsyncSession = Depends(get_db)):
+@app.post("/users/", response_model=schemas.StudentRead)
+async def create_user(user: schemas.StudentCreate, db: AsyncSession = Depends(get_db)):
     """
     Создает пользователя
     """
     return await crud.create_user(db, user)
 
 
-@app.get("/users/", response_model=list[schemas.UserRead])
+@app.get("/users/", response_model=list[schemas.StudentRead])
 async def read_users(db: AsyncSession = Depends(get_db)):
     """
     Читает все пользователей
@@ -50,7 +50,7 @@ async def read_users(db: AsyncSession = Depends(get_db)):
     return await crud.get_users(db)
 
 
-@app.get("/users/{user_id}", response_model=schemas.UserRead)
+@app.get("/users/{user_id}", response_model=schemas.StudentRead)
 async def read_user(user_id: int, db: AsyncSession = Depends(get_db)):
     """
     Читает одного пользователя
