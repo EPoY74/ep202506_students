@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import Student
-from app.schemas.schemas import StudentCreate
+from app.schemas.student import StudentCreate, StudentRead
 
 
 async def get_users(db: AsyncSession):
@@ -29,3 +29,13 @@ async def delete_user(db: AsyncSession, user_id: int):
         await db.commit()
         return True
     return False
+
+
+async def delete_user_check(db: AsyncSession, user_id: int):
+    user = await db.get(Student, user_id)
+    if user:
+        await db.delete(user)
+        await db.commit()
+        return StudentRead.model_validate(user)
+    return None
+
