@@ -25,7 +25,9 @@ class Base(DeclarativeBase):
     Базовый класс для всех ORM-моделей проекта.
     Используется для регистрации всех моделей и доступа к общей metadata.
     """
+
     pass
+
 
 # Настройки логгирования
 logging.basicConfig(
@@ -34,9 +36,7 @@ logging.basicConfig(
 
 
 if not os.getenv("DB_USER") or len(str(os.getenv("DB_USER"))) < 2:
-    err_message = (
-        "Переменная DB_USER ( Имя пользователя БД) в памяти не найдена."
-    )
+    err_message = "Переменная DB_USER ( Имя пользователя БД) в памяти не найдена."
     logging.warning(err_message)
 if not os.getenv("DB_PASSWORD") or len(str(os.getenv("DB_PASSWORD"))) < 2:
     err_message = (
@@ -47,13 +47,22 @@ if not os.getenv("DB_HOST") or len(str(os.getenv("DB_HOST"))) < 2:
     err_message = "Переменная DB_HOST (Хост БД) в памяти  не найдена."
     logging.warning(err_message)
 if not os.getenv("DB_PORT") or len(str(os.getenv("DB_PORT"))) < 2:
-    err_message = (
-        "Переменная DB_PORT (Порт подключения к БД) в памяти  не найдена."
-    )
+    err_message = "Переменная DB_PORT (Порт подключения к БД) в памяти  не найдена."
     logging.warning(err_message)
 if not os.getenv("DB_NAME") or len(str(os.getenv("DB_NAME"))) < 2:
     err_message = "Переменная DB_NAME (Имя БД) в памяти  не найдена."
     logging.warning(err_message)
+
+
+"""
+# === Проверка переменных окружения ===
+REQUIRED_ENV_VARS = ["DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT", "DB_NAME"]
+
+for var in REQUIRED_ENV_VARS:
+    value = os.getenv(var)
+    if not value or len(value.strip()) < 1:
+        logging.warning(f"Переменная {var} не найдена или пуста")
+"""
 
 if not dotenv.load_dotenv():
     err_message = "Файл .env с настройками не найден"
