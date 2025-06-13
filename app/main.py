@@ -5,11 +5,13 @@ API для работы со студентами
 
 from typing import Any, AsyncGenerator
 from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from .database import async_session, engine, Base
 from contextlib import asynccontextmanager
 from app import crud
 from app.schemas import schemas
+from app.models import StudentStatus, StudentExtraInfo, Student
 
 
 @asynccontextmanager
@@ -20,7 +22,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         yield
+    
+    async with AsyncSession(engine) as session:
+        result = await session.execute(
+            select(func.count()).select_from(StudentStatus)
+        )
+        student_status_count = result.scalar()
+        logging.info("")
 
+        if student_status_count == 0:
+            student_status = [
+                # StudentStatus(name="Alice", email="alice@example.com"),
+                # StudentStatus(name="Bob", email="bob@example.com")
+                StudentStatus(status_code='active', status_label = "Обучается"),
+                StudentStatus(status_code='academic_leave', status_label = "Академический отпуск"),
+                StudentStatus(status_code='expelled', status_label = "Отчислен"),
+                StudentStatus(status_code='reinstated', status_label = "Восстановлен"),
+                StudentStatus(status_code='graduated', status_label = "Завершил обучение"),
+                StudentStatus(status_code='transferred', status_label = "Переведён"),
+                StudentStatus(status_code='postgraduate', status_label = "Продолжает обучение"),
+                StudentStatus(status_code='debt', status_label = "Академическая задолженность"),
+            ]
+            await session.add_all(student_status)
+            await session.commit()
 
 app = FastAPI(lifespan=lifespan)
 
