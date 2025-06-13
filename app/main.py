@@ -3,6 +3,9 @@ https://github.com/EPoY74/ep202506_students
 API для работы со студентами
 """
 
+import logging
+import sys
+
 from typing import Any, AsyncGenerator
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import select, func
@@ -14,6 +17,21 @@ from app.schemas import schemas
 from app.models import StudentStatus, StudentExtraInfo, Student
 
 
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(asctime)s] [%(levelname)s] %(name)s: %(message)s",
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler("app.log", encoding="utf-8"),
+        ],
+    )
+
+
+setup_logging()
+logger = logging.getLogger(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     """
@@ -22,11 +40,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         yield
-    
+
     async with AsyncSession(engine) as session:
-        result = await session.execute(
-            select(func.count()).select_from(StudentStatus)
-        )
+        result = await session.execute(select(func.count()).select_from(StudentStatus))
         student_status_count = result.scalar()
         logging.info("")
 
@@ -34,17 +50,26 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
             student_status = [
                 # StudentStatus(name="Alice", email="alice@example.com"),
                 # StudentStatus(name="Bob", email="bob@example.com")
-                StudentStatus(status_code='active', status_label = "Обучается"),
-                StudentStatus(status_code='academic_leave', status_label = "Академический отпуск"),
-                StudentStatus(status_code='expelled', status_label = "Отчислен"),
-                StudentStatus(status_code='reinstated', status_label = "Восстановлен"),
-                StudentStatus(status_code='graduated', status_label = "Завершил обучение"),
-                StudentStatus(status_code='transferred', status_label = "Переведён"),
-                StudentStatus(status_code='postgraduate', status_label = "Продолжает обучение"),
-                StudentStatus(status_code='debt', status_label = "Академическая задолженность"),
+                StudentStatus(status_code="active", status_label="Обучается"),
+                StudentStatus(
+                    status_code="academic_leave", status_label="Академический отпуск"
+                ),
+                StudentStatus(status_code="expelled", status_label="Отчислен"),
+                StudentStatus(status_code="reinstated", status_label="Восстановлен"),
+                StudentStatus(
+                    status_code="graduated", status_label="Завершил обучение"
+                ),
+                StudentStatus(status_code="transferred", status_label="Переведён"),
+                StudentStatus(
+                    status_code="postgraduate", status_label="Продолжает обучение"
+                ),
+                StudentStatus(
+                    status_code="debt", status_label="Академическая задолженность"
+                ),
             ]
             await session.add_all(student_status)
             await session.commit()
+
 
 app = FastAPI(lifespan=lifespan)
 

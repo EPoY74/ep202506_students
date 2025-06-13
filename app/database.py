@@ -11,6 +11,8 @@ from sqlalchemy.orm import DeclarativeBase
 
 import dotenv
 
+logger = logging.getLogger(__name__)
+
 
 class EnverontmentVariableNotFound(BaseException):
     """
@@ -29,29 +31,23 @@ class Base(DeclarativeBase):
     pass
 
 
-# Настройки логгирования
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-
-
 if not os.getenv("DB_USER") or len(str(os.getenv("DB_USER"))) < 2:
     err_message = "Переменная DB_USER ( Имя пользователя БД) в памяти не найдена."
-    logging.warning(err_message)
+    logger.warning(err_message)
 if not os.getenv("DB_PASSWORD") or len(str(os.getenv("DB_PASSWORD"))) < 2:
     err_message = (
         "Переменная DB_PASSWORD (Пароль пользователя БД) в памяти  не найдена."
     )
-    logging.warning(err_message)
+    logger.warning(err_message)
 if not os.getenv("DB_HOST") or len(str(os.getenv("DB_HOST"))) < 2:
     err_message = "Переменная DB_HOST (Хост БД) в памяти  не найдена."
-    logging.warning(err_message)
+    logger.warning(err_message)
 if not os.getenv("DB_PORT") or len(str(os.getenv("DB_PORT"))) < 2:
     err_message = "Переменная DB_PORT (Порт подключения к БД) в памяти  не найдена."
-    logging.warning(err_message)
+    logger.warning(err_message)
 if not os.getenv("DB_NAME") or len(str(os.getenv("DB_NAME"))) < 2:
     err_message = "Переменная DB_NAME (Имя БД) в памяти  не найдена."
-    logging.warning(err_message)
+    logger.warning(err_message)
 
 
 """
@@ -61,16 +57,16 @@ REQUIRED_ENV_VARS = ["DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT", "DB_NAME"]
 for var in REQUIRED_ENV_VARS:
     value = os.getenv(var)
     if not value or len(value.strip()) < 1:
-        logging.warning(f"Переменная {var} не найдена или пуста")
+        logger.warning(f"Переменная {var} не найдена или пуста")
 """
 
 if not dotenv.load_dotenv():
     err_message = "Файл .env с настройками не найден"
-    logging.error(err_message)
+    logger.error(err_message)
     raise (EnverontmentVariableNotFound(err_message))
 else:
     info_message = "Найден и загружен файл с настройками .env"
-    logging.info(info_message)
+    logger.info(info_message)
 
 DATABASE_URL = (
     f"postgresql+asyncpg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@"
