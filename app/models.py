@@ -80,7 +80,7 @@ class Student(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     first_name: Mapped[str] = mapped_column(String(50), index=True)
     last_name: Mapped[str] = mapped_column(String(50))
-    date_of_birth: Mapped[datetime.date] = mapped_column(Date)
+    date_of_birth: Mapped[datetime.date] = mapped_column(Date, )
     email: Mapped[str] = mapped_column(String(50), unique=True, index=True)
     status_code: Mapped[str] = mapped_column(ForeignKey("student_status.status_code"))
 
