@@ -14,7 +14,7 @@ from .database import async_session, engine, Base
 from contextlib import asynccontextmanager
 from app import crud
 from app.schemas import schemas
-from app.models import StudentStatus, StudentExtraInfo, Student
+from app.models import StudentStatus
 
 
 def setup_logging():
