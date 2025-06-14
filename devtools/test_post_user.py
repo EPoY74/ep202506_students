@@ -8,8 +8,8 @@ import httpx
 # date_obj = datetime.strptime(date_str, "%d-%m-%Y").date()
 
 data = {
-    "first_name": "eugenii_1",
-    "last_name": "petrov_1",
+    "first_name": "eugenii_2",
+    "last_name": "petrov_2",
     "email": "eugenii_2@eugenii.ru",
     "date_of_birth": "1980-11-26",
     "status_code": "active",
