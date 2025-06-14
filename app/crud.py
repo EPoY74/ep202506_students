@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import Student
-from app.schemas.student import StudentCreate, StudentRead
+from app.schemas.schemas import StudentCreate, StudentRead
 
 
 async def get_users(db: AsyncSession):
