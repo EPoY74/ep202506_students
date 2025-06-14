@@ -12,7 +12,7 @@ from sqlalchemy.orm import DeclarativeBase
 import dotenv
 
 logger = logging.getLogger(__name__)
-
+logger.info('Запуск database.py')
 
 class EnverontmentVariableNotFound(BaseException):
     """
