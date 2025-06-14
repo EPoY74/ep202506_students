@@ -73,5 +73,10 @@ DATABASE_URL = (
     f"{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 )
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(
+    DATABASE_URL, 
+    echo=True, 
+    pool_pre_ping=True, # Проверка соединения перед использованием
+    pool_recycle=300, # Пересоздавать соединения каждые 300 секунд
+)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
