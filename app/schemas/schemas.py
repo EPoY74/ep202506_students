@@ -3,6 +3,7 @@ Pydantic-схемы для работы с пользователями (соз�
 """
 
 from pydantic import BaseModel, EmailStr
+from datetime import date
 
 
 class StudentBase(BaseModel):
@@ -12,6 +13,9 @@ class StudentBase(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    status_code: str
+    date_of_birth: date
+
 
 
 class StudentCreate(StudentBase):
