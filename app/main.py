@@ -5,13 +5,20 @@ API для работы со студентами
 
 import logging
 # import sys
-
 from typing import Any, AsyncGenerator
-from fastapi import FastAPI, Depends, HTTPException
+
+from contextlib import asynccontextmanager, suppress
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy import select, event
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from .database import async_session, engine, Base
-from contextlib import asynccontextmanager
+
+import uuid
+
+
 from app import crud
 from app.schemas import schemas
 from app.models import StudentStatus
@@ -83,6 +90,106 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         logger.debug('Инициалзация сесии:')
         yield session
+
+
+# Middleware для глобальной обработки ошибок
+@app.middleware("http")
+async def global_error_handler(request: Request, call_next):
+    """
+    Глобальный обработчик ошибок, который перехватывает все исключения,
+    возникающие при обработке HTTP-запросов.
+    
+    Принцип работы:
+    1. Пытается выполнить следующий middleware/обработчик запроса (call_next)
+    2. Если возникает исключение - перехватывает его и возвращает соответствующий JSON-ответ
+    3. Логирует все ошибки для последующего анализа
+    """
+    
+    try:
+        # Пробуем выполнить запрос
+        return await call_next(request)
+    
+    except RequestValidationError as exc:
+        """
+        Обработка ошибок валидации входных данных (Pydantic).
+        FastAPI автоматически генерирует эти ошибки при несоответствии данных схеме.
+        """
+        # Логируем информацию для отладки (уровень DEBUG чтобы не засорять логи в production)
+        logger.debug("Validation error", exc_info=True)
+        
+        # Возвращаем ответ в формате, совместимом с Pydantic
+        return JSONResponse(
+            status_code=422,  # HTTP 422 Unprocessable Entity - стандартный код для ошибок валидации
+            content={
+                "detail": [
+                    {
+                        "type": error["type"],  # Тип ошибки (например, "value_error.missing")
+                        "loc": error["loc"],  # Место возникновения ошибки (например, ["body", "username"])
+                        "msg": error["msg"],  # Сообщение об ошибке
+                        "input": error.get("input"),  # Неверные входные данные
+                        "ctx": error.get("ctx")  # Дополнительный контекст
+                    } for error in exc.errors()  # Преобразуем все ошибки в список
+                ]
+            }
+        )
+    
+    except HTTPException as http_exc:
+        """
+        Обработка уже созданных HTTP-исключений.
+        Эти исключения обычно создаются явно в коде обработчиков маршрутов.
+        Мы просто передаем их дальше без изменений.
+        """
+        raise http_exc
+    
+    except SQLAlchemyError as db_exc:
+        """
+        Обработка ошибок базы данных (SQLAlchemy).
+        Важно выполнить rollback транзакции и не раскрывать детали ошибки клиенту.
+        """
+        # Пытаемся выполнить rollback безопасно (suppress подавляет возможные исключения)
+        with suppress(Exception):
+            if hasattr(request.state, "db"):
+                request.state.db.rollback()
+        
+        # Логируем полную ошибку для администратора
+        logger.error("Database error", exc_info=True)
+        
+        # Возвращаем клиенту обобщенное сообщение
+        return JSONResponse(
+            status_code=400,  # HTTP 400 Bad Request - общий код для ошибок клиента
+            content={
+                "detail": [{
+                    "type": "database_error",
+                    "msg": "Database operation failed",
+                    # В production показываем общее сообщение, в debug режиме - детали
+                    "ctx": {"error": "Check logs for details"} if not app.debug else {"error": str(db_exc)}
+                }]
+            }
+        )
+    
+    except Exception as exc:
+        """
+        Обработка всех неожиданных исключений (крайний случай).
+        Генерируем уникальный ID ошибки для отслеживания и логируем полную информацию.
+        """
+        # Генерируем уникальный ID для ошибки
+        error_id = uuid.uuid4()
+        
+        # Логируем критическую ошибку с полной информацией
+        logger.critical(f"Unexpected error {error_id}: {exc}", exc_info=True)
+        
+        # Возвращаем клиенту сообщение с ID ошибки
+        return JSONResponse(
+            status_code=500,  # HTTP 500 Internal Server Error
+            content={
+                "detail": [{
+                    "type": "server_error",
+                    "msg": "Internal server error",
+                    "error_id": str(error_id),  # Уникальный ID для поиска в логах
+                    "info": "Contact support with this error_id"  # Инструкция для пользователя
+                }]
+            }
+        )
 
 
 @app.post("/create_user/", response_model=schemas.StudentRead)
