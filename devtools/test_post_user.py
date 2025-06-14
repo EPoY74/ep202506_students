@@ -1,11 +1,7 @@
 
-from datetime import datetime
 import json
 
 import httpx
-
-# date_str = "26-11-1980"
-# date_obj = datetime.strptime(date_str, "%d-%m-%Y").date()
 
 data = {
     "first_name": "eugenii_2",
