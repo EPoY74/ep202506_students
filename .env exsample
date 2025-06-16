@@ -1,0 +1,13 @@
+# настройки для Postgres (инициализация контейнера)
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgrese
+
+# наши собственные настройки
+
+
+DB_HOST=db #"localhost"
+DB_PORT=5432
+DB_NAME=my_db_name
+DB_USER=db_username
+DB_PASSWORD=top_secret_password
