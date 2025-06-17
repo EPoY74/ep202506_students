@@ -4,8 +4,8 @@ import json
 import httpx
 
 data = {
-    "first_name": "eugenii_3",
-    "last_name": "petrov_3",
+    "first_name": "eugenii_4",
+    "last_name": "petrov_4",
     "email": "eugenii_3@eugenii.ru",
     "date_of_birth": "1980-11-26",
     "status_code": "active",
