@@ -11,7 +11,8 @@ from contextlib import asynccontextmanager, suppress
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from sqlalchemy import select, event
+from sqlalchemy import select, event, MetaData, Table
+from sqlalchemy.engine import Connection
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from .database import async_session, engine, Base
@@ -35,13 +36,13 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Создаем обработчик события
-def after_create(target, connection, **kw):
+def after_create(target: MetaData | Table, connection: Connection, **kw) -> None:
     logger.info("СТАРТ: Запуск инициализации таблицы StudentStatus начальными значениями")
     if not connection.execute(select(StudentStatus).limit(1)).fetchone():
         logger.info("НАЧАЛО: Инициализация таблицы StudentStatus")
         connection.execute(
             StudentStatus.__table__.insert(),
-            [
+            [C
                 {"status_code": "active", "status_label": "Обучается"},
                 {"status_code": "academic_leave", "status_label": "Академический отпуск"},
                 {"status_code": "expelled", "status_label": "Отчислен"},
